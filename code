@@ -1,0 +1,30 @@
+package sparkpack
+import org.apache.spark._
+import sys.process._
+object sparkobj {
+  
+  def main(args:Array[String]) : Unit = {
+    
+    val conf = new SparkConf().setAppName("first").setMaster("local[*]")
+    val sc = new SparkContext(conf)
+    sc.setLogLevel("ERROR")
+    
+    val rdd = sc.textFile("file:///D:/data/customer_records.csv")
+
+val header = rdd.first()
+val headerrdd = rdd.filter(x => x!= header)
+
+val statesrdd = headerrdd.map(x => x.split(",")).map(x => x(7)).distinct().sortBy(x => x(0))
+
+//statesrdd.foreach(println)
+
+val srdd = headerrdd.map(x => x.split(","))
+val validaterdd = srdd.map(x => x(7).lengthCompare(2))
+validaterdd.foreach(println)
+
+"hadoop fs -rmr /user/odir/rdddata". !
+
+validaterdd.saveAsTextFile("file:///D:/data/rdddata")
+    
+  }
+}
